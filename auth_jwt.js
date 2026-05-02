@@ -8,17 +8,14 @@ var opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.SECRET_KEY;
 
-passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    User.findById(jwt_payload.id, function(err, user) {
-        if (err) {
-            return done(err, false);
-        }
-        if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false);
-        }
-    });
+passport.use(new JwtStrategy(opts, async function(jwt_payload, done) {
+    try {
+        const user = await User.findById(jwt_payload.id);
+        if (user) return done(null, user);
+        return done(null, false);
+    } catch (err) {
+        return done(err, false);
+    }
 }));
 
 exports.isAuthernicated = passport.authenticate('jwt', { session: false });
