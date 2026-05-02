@@ -103,6 +103,22 @@ router.route('/packs')
     });
 
 router.route('/cards')
+    .get(authJWT.isAuthernicated, async (req, res) => {
+        if (!req.query.packId) {
+            return res.status(400).json({ error: 'Pack ID is required' });
+        }   
+        try {
+            const pack = await Pack.findOne({ _id: req.query.packId, userId: req.user._id });
+            if (!pack) {
+                return res.status(404).json({ error: 'Pack not found' });
+            }   
+            const cards = await Card.find({ PackId: req.query.packId });
+            res.json(cards);
+        } catch (err) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    })
+    
     .post(authJWT.isAuthernicated, async (req, res) => {
         if (!req.body.front || !req.body.back || !req.body.PackId) {
             return res.status(400).json({ error: 'Front, back, and Pack ID are required' });
