@@ -144,15 +144,12 @@ router.route('/cards')
             return res.status(400).json({ error: 'Card ID is required' });
         }   
         try {
-            const card = await Card.findById(req.body.cardId).populate('PackId');
-            if (!card) {
+           const deletedCard = await Card.findOneAndDelete({ _id: req.body.cardId });
+           if (!deletedCard) {
                 return res.status(404).json({ error: 'Card not found' });
-            }   
-            if (card.PackId.userId.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ error: 'Unauthorized' });
             }
-            await card.remove();
             res.json({ message: 'Card deleted successfully' });
+            
         } catch (err) {
             res.status(500).json({ error: 'Internal server error' });
         }
