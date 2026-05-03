@@ -78,7 +78,8 @@ router.route('/packs')
             const pack = new Pack({
                 name: req.body.name,    
                 description: req.body.description,
-                userId: req.user._id
+                userId: req.user._id,
+                score: 0
             });
             await pack.save();
             res.status(201).json({ message: 'Pack created successfully', pack: pack });
@@ -99,8 +100,27 @@ router.route('/packs')
             res.json({ message: 'Pack and associated cards deleted successfully' });
         } catch (err) {
             res.status(500).json({ error: 'Internal server error' });
+        }  
+    })
+    .put(authJWT.isAuthernicated, async (req, res) => {
+        if (!req.body.packId) {
+            return res.status(400).json({ error: 'Pack ID is required' });
+        }
+        try {
+            const pack = await Pack.findOne({ _id: req.body.packId, userId: req.user._id });
+            if (!pack) {
+                return res.status(404).json({ error: 'Pack not found' });
+            }
+            if (req.body.name) pack.name = req.body.name;
+            if (req.body.description) pack.description = req.body.description;
+            if (typeof req.body.score === 'number') pack.score = req.body.score;
+            await pack.save();
+            res.json({ message: 'Pack updated successfully', pack: pack });
+        } catch (err) {
+            res.status(500).json({ error: 'Internal server error' });
         }   
-    });
+    })    
+    ;
 
 router.route('/cards')
     .get(authJWT.isAuthernicated, async (req, res) => {

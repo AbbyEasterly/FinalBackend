@@ -16,7 +16,8 @@ connectToDatabase();
 const packSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    score: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('Pack', packSchema);
